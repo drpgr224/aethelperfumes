@@ -20,6 +20,36 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase Setup
+
+This app uses Prisma for all server-side database access. Supabase should therefore be connected as the Postgres database behind Prisma, not by replacing the existing data layer with direct client calls.
+
+Create a local environment file at `.env` so Prisma and Next.js both see the same values. If you want, you can duplicate them into `.env.local` later for local overrides.
+
+```bash
+DATABASE_URL="postgresql://postgres:[YOUR-SUPABASE-DB-PASSWORD]@db.hyrpuignsmmatkekjaly.supabase.co:5432/postgres?schema=public"
+DIRECT_URL="postgresql://postgres:[YOUR-SUPABASE-DB-PASSWORD]@db.hyrpuignsmmatkekjaly.supabase.co:5432/postgres?schema=public"
+NEXT_PUBLIC_SUPABASE_URL="https://hyrpuignsmmatkekjaly.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+JWT_SECRET="change-this-before-production"
+```
+
+Notes:
+
+- `DATABASE_URL` and `DIRECT_URL` require your Supabase Postgres password from Project Settings > Database. The anon key is not sufficient for Prisma.
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are used by the Supabase client helpers in `lib/supabase`.
+- `SUPABASE_SERVICE_ROLE_KEY` is only needed for privileged server-side Supabase operations. Keep it server-only.
+
+After setting the variables, run:
+
+```bash
+npx prisma generate
+npx prisma migrate deploy
+```
+
+If this Supabase database is empty and you want the current catalog/admin data loaded, run one of the existing seed scripts after migrations.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
